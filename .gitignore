@@ -30,6 +30,9 @@ Thumbs.db
 .vscode/
 .idea/
 
+# PDF.js worker (generated — copy from node_modules)
+public/pdf.worker.min.js
+
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts

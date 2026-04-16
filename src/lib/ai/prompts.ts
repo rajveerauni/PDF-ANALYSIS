@@ -3,7 +3,7 @@ export function buildInsightsPrompt(text: string, fileName: string): string {
 
 Document: "${fileName}"
 Content:
-${text.slice(0, 12000)}
+${text.slice(0, 6000)}
 
 Return ONLY valid JSON matching this exact schema:
 {

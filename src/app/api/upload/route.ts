@@ -59,26 +59,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to create document record' }, { status: 500 });
     }
 
-    // 2. Upload to Supabase Storage
+    // 2. Parse text + upload to storage in parallel
     const arrayBuffer = await file.arrayBuffer();
-    const { error: uploadError } = await supabaseAdmin.storage
-      .from('documents')
-      .upload(storagePath, arrayBuffer, {
-        contentType: file.type || 'application/octet-stream',
-        upsert: false,
-      });
-
-    if (uploadError) {
-      await supabaseAdmin.from('documents').update({ status: 'error' }).eq('id', doc.id);
-      return NextResponse.json({ error: 'Storage upload failed' }, { status: 500 });
-    }
-
-    // 3. Parse text (server-side for DOCX/TXT; PDF text comes from client via formData)
-    await supabaseAdmin.from('documents').update({ status: 'parsing' }).eq('id', doc.id);
 
     let fullText = '';
     let pageCount = 1;
-    let charCount = 0;
 
     if (fileType === 'txt') {
       fullText = await file.text();
@@ -90,13 +75,24 @@ export async function POST(req: NextRequest) {
       fullText = result.value;
       pageCount = Math.max(1, Math.ceil(fullText.length / 2000));
     } else {
-      // PDF: client sends extracted text in formData
       fullText = (formData.get('text') as string) ?? '';
       pageCount = parseInt((formData.get('pageCount') as string) ?? '1', 10);
     }
-    charCount = fullText.length;
+    const charCount = fullText.length;
 
-    await supabaseAdmin.from('documents').update({ status: 'analyzing', page_count: pageCount, char_count: charCount }).eq('id', doc.id);
+    // Upload to storage and update status simultaneously
+    const [uploadResult] = await Promise.all([
+      supabaseAdmin.storage.from('documents').upload(storagePath, arrayBuffer, {
+        contentType: file.type || 'application/octet-stream',
+        upsert: false,
+      }),
+      supabaseAdmin.from('documents').update({ status: 'analyzing', page_count: pageCount, char_count: charCount }).eq('id', doc.id),
+    ]);
+
+    if (uploadResult.error) {
+      await supabaseAdmin.from('documents').update({ status: 'error' }).eq('id', doc.id);
+      return NextResponse.json({ error: 'Storage upload failed' }, { status: 500 });
+    }
 
     // 4. AI Analysis with chunking
     const chunks = chunkText(fullText);
