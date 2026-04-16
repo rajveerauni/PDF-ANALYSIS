@@ -4,6 +4,9 @@ A tool that lets you upload any business PDF and instantly get AI-powered insigh
 
 ![App Screenshot](Screenshot%202026-04-16%20235826.png)
 
+## Live:
+https://pdf-analysis-o154.vercel.app/
+
 ## Stack
 
 - Frontend: React + Vite + Tailwind CSS + `react-dropzone` + `pdfjs-dist`
