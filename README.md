@@ -3,7 +3,7 @@
 A tool that lets you upload any business PDF and instantly get AI-powered insights on revenue, risks, growth and opportunities
 
 
-![App Screenshot](assets/Screenshot-2026-04-16-235826.png)
+![App Screenshot](assets/Screenshot%202026-04-16%20235826.png)
 
 ## Stack
 
