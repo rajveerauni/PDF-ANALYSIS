@@ -8,10 +8,5 @@
       "entrypoint": "backend",
       "routePrefix": "/_/backend"
     }
-  },
-  "functions": {
-    "src/app/api/upload/route.ts": { "maxDuration": 60 },
-    "src/app/api/analyze/route.ts": { "maxDuration": 30 },
-    "src/app/api/chat/route.ts": { "maxDuration": 30 }
   }
 }
